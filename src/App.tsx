@@ -1,31 +1,60 @@
-function App() {
-  // SEARCH SUBMIT HANDLER
-  // const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  // };
+import { type SubmitEvent, useState } from "react";
 
-  const fetchPorter = async () => {
+type ReleaseGroup = {
+  id: string;
+  title: string;
+  "artist-credit": {
+    name: string;
+    artist: {
+      id: string;
+      name: string;
+    };
+  }[];
+};
+
+function App() {
+  const fetchReleaseGroups = async () => {
     try {
       const res = await fetch(
-        "https://musicbrainz.org/ws/2/artist/4ae36ade-1798-48c4-b06b-cc68b7d3d83f?inc=genres&fmt=json",
+        `https://musicbrainz.org/ws/2/release-group/?query=release:${searchQuery}&fmt=json&limit=100`,
       );
       const data = await res.json();
-      console.log(data);
-      return data;
+      setFetchedReleaseGroups(data["release-groups"]);
     } catch (e) {
-      console.error(e);
+      console.error("Error: ", e);
     }
   };
 
+  const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    fetchReleaseGroups();
+  };
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [fetchedReleaseGroups, setFetchedReleaseGroups] = useState([]);
+
   return (
     <>
-      {/* SEARCH BAR */}
-      {/* <form onSubmit={(e) => handleSubmit(e)}> */}
-      {/*   <label htmlFor="searchbar">Search for a release: </label> */}
-      {/*   <input type="text" id="searchbar" /> */}
-      {/*   <button type="submit">Search</button> */}
-      {/* </form> */}
-      <div>{}</div>
+      <form onSubmit={(e) => handleSubmit(e)}>
+        <label htmlFor="searchbar">Search for a MusicBrainz release group: </label>
+        <input
+          type="text"
+          id="searchbar"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <button type="submit">Search</button>
+      </form>
+      <div>
+        {fetchedReleaseGroups.map((releaseGroup: ReleaseGroup) => {
+          return (
+            <div key={releaseGroup.id}>
+              <span>{releaseGroup.title}</span>
+              <span>{releaseGroup["artist-credit"][0].name}</span>
+            </div>
+          );
+        })}
+      </div>
     </>
   );
 }
