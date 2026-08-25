@@ -51,6 +51,7 @@ function App() {
             <div key={releaseGroup.id}>
               <span>{releaseGroup.title}</span>
               <span>{releaseGroup["artist-credit"][0].name}</span>
+              <button>Review</button>
             </div>
           );
         })}
