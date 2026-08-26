@@ -1,4 +1,7 @@
 import { type SubmitEvent, useState } from "react";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Button } from "./components/ui/button";
 
 type ReleaseGroup = {
   id: string;
@@ -32,30 +35,46 @@ function App() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [fetchedReleaseGroups, setFetchedReleaseGroups] = useState([]);
+  const [selectedReleaseGroup, setSelectedReleaseGroup] = useState("");
 
   return (
     <>
       <form onSubmit={(e) => handleSubmit(e)}>
-        <label htmlFor="searchbar">Search for a MusicBrainz release group: </label>
-        <input
-          type="text"
-          id="searchbar"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        <button type="submit">Search</button>
+        <Field>
+          <FieldLabel htmlFor="searchbar">Search</FieldLabel>
+          <Input
+            id="searchbar"
+            type="text"
+            placeholder="Enter query"
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <FieldDescription>Search for a MusicBrainz release group</FieldDescription>
+        </Field>
+        <Button type="submit" variant={"outline"}>
+          Search
+        </Button>
       </form>
       <div>
         {fetchedReleaseGroups.map((releaseGroup: ReleaseGroup) => {
           return (
-            <div key={releaseGroup.id}>
+            <div key={releaseGroup.id} className="flex flex-row gap-2 items-center">
               <span>{releaseGroup.title}</span>
+              <span>-</span>
               <span>{releaseGroup["artist-credit"][0].name}</span>
-              <button>Review</button>
+              <Button
+                variant={"outline"}
+                onClick={() => {
+                  setSelectedReleaseGroup(releaseGroup.id);
+                  setFetchedReleaseGroups([]);
+                }}
+              >
+                Review
+              </Button>
             </div>
           );
         })}
       </div>
+      {selectedReleaseGroup && <div>Selected Release Group ID: {selectedReleaseGroup}</div>}
     </>
   );
 }
