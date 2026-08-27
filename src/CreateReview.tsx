@@ -1,8 +1,9 @@
-import { type SubmitEvent, useState } from "react";
+import { type SubmitEvent, type Dispatch, type SetStateAction, useState, useEffect } from "react";
 import { Field, FieldGroup, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "./components/ui/button";
 import { Textarea } from "./components/ui/textarea";
+import { type Review } from "./App.tsx";
 
 type ReleaseGroup = {
   id: string;
@@ -16,7 +17,13 @@ type ReleaseGroup = {
   }[];
 };
 
-function CreateReview() {
+function CreateReview({
+  reviews,
+  setReviews,
+}: {
+  reviews: Review[];
+  setReviews: Dispatch<SetStateAction<Review[]>>;
+}) {
   const fetchReleaseGroups = async () => {
     try {
       const res = await fetch(
@@ -36,8 +43,26 @@ function CreateReview() {
 
   const handleReviewSubmit = (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // setreview(rating, remarks)
+    if (!selectedReleaseGroup) {
+      console.error("Can't submit review, no release group selected!");
+      return;
+    }
+    setReviews((prev) => [
+      ...prev,
+      {
+        releaseGroupId: selectedReleaseGroup.id,
+        releaseGroupTitle: selectedReleaseGroup.title,
+        releaseGroupArtist: selectedReleaseGroup["artist-credit"][0].name,
+        rating: rating,
+        remarks: remarks,
+      },
+    ]);
+    setSelectedReleaseGroup(undefined);
   };
+
+  useEffect(() => {
+    localStorage.setItem("reviews", JSON.stringify(reviews));
+  }, [reviews]);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [fetchedReleaseGroups, setFetchedReleaseGroups] = useState([]);
