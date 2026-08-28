@@ -1,6 +1,6 @@
-import CreateReview from "./CreateReview";
+import CreateReview from "@/CreateReview";
 import { useState } from "react";
-import SavedReviews from "./SavedReviews";
+import SavedReviews from "@/SavedReviews";
 
 export type Review = {
   releaseGroupId: string;
@@ -24,7 +24,7 @@ function App() {
   return (
     <>
       <CreateReview reviews={reviews} setReviews={setReviews} />
-      <SavedReviews reviews={reviews} />
+      <SavedReviews reviews={reviews} setReviews={setReviews} />
     </>
   );
 }

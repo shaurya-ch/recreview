@@ -1,9 +1,9 @@
 import { type SubmitEvent, type Dispatch, type SetStateAction, useState, useEffect } from "react";
 import { Field, FieldGroup, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Button } from "./components/ui/button";
-import { Textarea } from "./components/ui/textarea";
-import { type Review } from "./App.tsx";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { type Review } from "@/App.tsx";
 
 type ReleaseGroup = {
   id: string;
@@ -26,6 +26,7 @@ function CreateReview({
 }) {
   const fetchReleaseGroups = async () => {
     try {
+      setLoading(true);
       const res = await fetch(
         `https://musicbrainz.org/ws/2/release-group/?query=release:${searchQuery}&fmt=json&limit=100`,
       );
@@ -33,6 +34,8 @@ function CreateReview({
       setFetchedReleaseGroups(data["release-groups"]);
     } catch (e) {
       console.error("Error: ", e);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -58,17 +61,21 @@ function CreateReview({
       },
     ]);
     setSelectedReleaseGroup(undefined);
+    setRating(0);
+    setRemarks("");
   };
-
-  useEffect(() => {
-    localStorage.setItem("reviews", JSON.stringify(reviews));
-  }, [reviews]);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [fetchedReleaseGroups, setFetchedReleaseGroups] = useState([]);
   const [selectedReleaseGroup, setSelectedReleaseGroup] = useState<ReleaseGroup>();
   const [rating, setRating] = useState(0);
   const [remarks, setRemarks] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [isDupe, setIsDupe] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem("reviews", JSON.stringify(reviews));
+  }, [reviews]);
 
   return (
     <>
@@ -87,6 +94,7 @@ function CreateReview({
           Search
         </Button>
       </form>
+      {loading && <div>Please wait. Loading release groups...</div>}
       <div>
         {fetchedReleaseGroups.map((releaseGroup: ReleaseGroup) => {
           return (
@@ -97,8 +105,13 @@ function CreateReview({
               <Button
                 variant={"outline"}
                 onClick={() => {
-                  setSelectedReleaseGroup(releaseGroup);
-                  setFetchedReleaseGroups([]);
+                  if (reviews.some((review) => review.releaseGroupId === releaseGroup.id)) {
+                    setIsDupe(true);
+                    alert("You've already reviewed that one!");
+                  } else {
+                    setSelectedReleaseGroup(releaseGroup);
+                    setFetchedReleaseGroups([]);
+                  }
                 }}
               >
                 Review
@@ -107,7 +120,7 @@ function CreateReview({
           );
         })}
       </div>
-      {selectedReleaseGroup && (
+      {selectedReleaseGroup && !isDupe && (
         <div>
           <div>Selected Release Group ID: {selectedReleaseGroup.id}</div>
           <div>
