@@ -1,9 +1,9 @@
-import { type SubmitEvent, type Dispatch, type SetStateAction, useState, useEffect } from "react";
+import { type SubmitEvent, useState, useEffect } from "react";
 import { Field, FieldGroup, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { type Review } from "@/App.tsx";
+import { useReviewContext } from "./reviews-context";
 
 type ReleaseGroup = {
   id: string;
@@ -17,13 +17,9 @@ type ReleaseGroup = {
   }[];
 };
 
-function CreateReview({
-  reviews,
-  setReviews,
-}: {
-  reviews: Review[];
-  setReviews: Dispatch<SetStateAction<Review[]>>;
-}) {
+function CreateReview() {
+  const [reviews, setReviews] = useReviewContext();
+
   const fetchReleaseGroups = async () => {
     try {
       setLoading(true);

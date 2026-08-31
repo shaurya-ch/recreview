@@ -1,17 +1,13 @@
-import { type Dispatch, type SetStateAction, useState } from "react";
-import { type Review } from "@/App.tsx";
+import { useState } from "react";
 import { Button } from "@/components/ui/button.tsx";
 import { Field, FieldGroup, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input.tsx";
 import { Textarea } from "@/components/ui/textarea.tsx";
+import { useReviewContext } from "./reviews-context";
 
-function SavedReviews({
-  reviews,
-  setReviews,
-}: {
-  reviews: Review[];
-  setReviews: Dispatch<SetStateAction<Review[]>>;
-}) {
+function SavedReviews() {
+  const [reviews, setReviews] = useReviewContext();
+
   const handleDelete = (id: string) => {
     setReviews(reviews.filter((review) => review.releaseGroupId !== id));
   };

@@ -1,6 +1,5 @@
-import CreateReview from "@/CreateReview";
-import { useState } from "react";
-import SavedReviews from "@/SavedReviews";
+import { useState, type Dispatch, type SetStateAction } from "react";
+import { Outlet } from "react-router";
 
 export type Review = {
   releaseGroupId: string;
@@ -9,6 +8,8 @@ export type Review = {
   rating: number;
   remarks: string;
 };
+
+export type ReviewContextType = [reviews: Review[], setReviews: Dispatch<SetStateAction<Review[]>>];
 
 function App() {
   const getInitialReviews = () => {
@@ -23,8 +24,7 @@ function App() {
 
   return (
     <>
-      <CreateReview reviews={reviews} setReviews={setReviews} />
-      <SavedReviews reviews={reviews} setReviews={setReviews} />
+      <Outlet context={[reviews, setReviews] satisfies ReviewContextType} />
     </>
   );
 }
