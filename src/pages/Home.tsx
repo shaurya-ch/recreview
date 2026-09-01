@@ -5,10 +5,10 @@ function Home() {
     <>
       <div>Hiiii :3</div>
       <div>
-        <a href="/create" className={buttonVariants({ variant: "outline", size: "sm" })}>
+        <a href="/create" className={buttonVariants({ variant: "outline", size: "lg" })}>
           Create Review
         </a>
-        <a href="/saved" className={buttonVariants({ variant: "outline", size: "sm" })}>
+        <a href="/saved" className={buttonVariants({ variant: "outline", size: "lg" })}>
           Saved Reviews
         </a>
       </div>

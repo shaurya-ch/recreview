@@ -37,7 +37,7 @@ function SavedReviews() {
 
   return (
     <>
-      <a href="/" className={buttonVariants({ variant: "outline", size: "sm" })}>
+      <a href="/" className={buttonVariants({ variant: "outline", size: "lg" })}>
         Go Home
       </a>
       {reviews && (
