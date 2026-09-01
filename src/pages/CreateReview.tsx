@@ -1,9 +1,10 @@
+import { buttonVariants } from "@/components/ui/button";
 import { type SubmitEvent, useState, useEffect } from "react";
 import { Field, FieldGroup, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useReviewContext } from "./reviews-context";
+import { useReviewContext } from "@/reviews-context";
 
 type ReleaseGroup = {
   id: string;
@@ -75,6 +76,9 @@ function CreateReview() {
 
   return (
     <>
+      <a href="/" className={buttonVariants({ variant: "outline", size: "sm" })}>
+        Go Home
+      </a>
       <form onSubmit={(e) => handleSearchSubmit(e)}>
         <Field>
           <FieldLabel htmlFor="searchbar">Search</FieldLabel>

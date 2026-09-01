@@ -4,9 +4,9 @@ import App from "@/App.tsx";
 import "@/index.css";
 import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
-import CreateReview from "@/CreateReview";
-import SavedReviews from "@/SavedReviews";
-import Home from "@/Home";
+import CreateReview from "@/pages/CreateReview";
+import SavedReviews from "@/pages/SavedReviews";
+import Home from "@/pages/Home";
 
 const router = createBrowserRouter([
   {
