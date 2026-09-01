@@ -2,9 +2,9 @@ import { buttonVariants } from "@/components/ui/button";
 
 function Home() {
   return (
-    <>
-      <div>Hiiii :3</div>
-      <div>
+    <div className="w-dvw h-dvh flex flex-col gap-2 justify-center items-center">
+      <div className="text-3xl font-extrabold font-mono">recreview</div>
+      <div className="flex flex-row gap-2">
         <a href="/create" className={buttonVariants({ variant: "outline", size: "lg" })}>
           Create Review
         </a>
@@ -12,7 +12,7 @@ function Home() {
           Saved Reviews
         </a>
       </div>
-    </>
+    </div>
   );
 }
 

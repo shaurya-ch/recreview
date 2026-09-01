@@ -1,10 +1,18 @@
 import { buttonVariants } from "@/components/ui/button.tsx";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button.tsx";
 import { Field, FieldGroup, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input.tsx";
 import { Textarea } from "@/components/ui/textarea.tsx";
 import { useReviewContext } from "@/reviews-context";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 function SavedReviews() {
   const [reviews, setReviews] = useReviewContext();
@@ -35,86 +43,96 @@ function SavedReviews() {
   const [newRating, setNewRating] = useState(0);
   const [newRemarks, setNewRemarks] = useState("");
 
+  useEffect(() => {
+    localStorage.setItem("reviews", JSON.stringify(reviews));
+  }, [reviews]);
+
   return (
     <>
       <a href="/" className={buttonVariants({ variant: "outline", size: "lg" })}>
         Go Home
       </a>
       {reviews && (
-        <div>
+        <div className="flex flex-col gap-2">
           {reviews.map((review) => {
             return (
-              <div key={review.releaseGroupId}>
-                <div>{review.releaseGroupTitle}</div>
-                <div>{review.releaseGroupArtist}</div>
-                {editingId === review.releaseGroupId ? (
-                  <form
-                    onSubmit={() => {
-                      handleUpdateReview(review.releaseGroupId);
-                    }}
-                  >
-                    <FieldGroup>
-                      <Field>
-                        <FieldLabel htmlFor="rating">Rating (1-5)</FieldLabel>
-                        <Input
-                          id="rating"
-                          placeholder="Enter Rating"
-                          type="number"
-                          max={5}
-                          min={1}
-                          step={1}
-                          onChange={(e) => setNewRating(+e.target.value)}
-                          value={newRating}
-                        />
-                      </Field>
-                      <Field>
-                        <FieldLabel htmlFor="remarks">Remarks</FieldLabel>
-                        <Textarea
-                          id="remarks"
-                          placeholder="Enter Remarks"
-                          onChange={(e) => setNewRemarks(e.target.value)}
-                          value={newRemarks}
-                        />
-                        <FieldDescription>What did you think of the release?</FieldDescription>
-                      </Field>
-                      <Field orientation="horizontal">
-                        <Button type="submit">Submit</Button>
-                        <Button
-                          type="button"
-                          onClick={() => {
-                            setEditingId("");
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                      </Field>
-                    </FieldGroup>
-                  </form>
-                ) : (
-                  <div>
-                    <div>{review.rating}</div>
-                    <div>{review.remarks}</div>
-                  </div>
-                )}
-                <Button
-                  variant={"outline"}
-                  onClick={() => {
-                    handleDelete(review.releaseGroupId);
-                  }}
-                >
-                  Delete Review
-                </Button>
-                <Button
-                  variant={"outline"}
-                  onClick={() => {
-                    setEditingId(review.releaseGroupId);
-                    setNewRating(review.rating);
-                    setNewRemarks(review.remarks);
-                  }}
-                >
-                  Edit Review
-                </Button>
-              </div>
+              <Card key={review.releaseGroupId}>
+                <CardHeader>
+                  <CardTitle>{review.releaseGroupTitle}</CardTitle>
+                  <CardDescription>{review.releaseGroupArtist}</CardDescription>
+                  <CardAction>
+                    <Button
+                      variant={"outline"}
+                      onClick={() => {
+                        handleDelete(review.releaseGroupId);
+                      }}
+                    >
+                      Delete Review
+                    </Button>
+                    <Button
+                      variant={"outline"}
+                      onClick={() => {
+                        setEditingId(review.releaseGroupId);
+                        setNewRating(review.rating);
+                        setNewRemarks(review.remarks);
+                      }}
+                    >
+                      Edit Review
+                    </Button>
+                  </CardAction>
+                </CardHeader>
+                <CardContent>
+                  {editingId === review.releaseGroupId ? (
+                    <form
+                      onSubmit={() => {
+                        handleUpdateReview(review.releaseGroupId);
+                      }}
+                    >
+                      <FieldGroup>
+                        <Field>
+                          <FieldLabel htmlFor="rating">Rating (1-5)</FieldLabel>
+                          <Input
+                            id="rating"
+                            placeholder="Enter Rating"
+                            type="number"
+                            max={5}
+                            min={1}
+                            step={1}
+                            onChange={(e) => setNewRating(+e.target.value)}
+                            value={newRating}
+                          />
+                        </Field>
+                        <Field>
+                          <FieldLabel htmlFor="remarks">Remarks</FieldLabel>
+                          <Textarea
+                            id="remarks"
+                            placeholder="Enter Remarks"
+                            onChange={(e) => setNewRemarks(e.target.value)}
+                            value={newRemarks}
+                          />
+                          <FieldDescription>What did you think of the release?</FieldDescription>
+                        </Field>
+                        <Field orientation="horizontal">
+                          <Button type="submit">Submit</Button>
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              setEditingId("");
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </Field>
+                      </FieldGroup>
+                    </form>
+                  ) : (
+                    <div>
+                      <div>{review.rating}</div>
+                      <div>{review.remarks}</div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             );
           })}
         </div>

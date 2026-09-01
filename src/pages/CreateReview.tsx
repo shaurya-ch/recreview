@@ -28,9 +28,13 @@ function CreateReview() {
         `https://musicbrainz.org/ws/2/release-group/?query=release:${searchQuery}&fmt=json&limit=100`,
       );
       const data = await res.json();
-      setFetchedReleaseGroups(data["release-groups"]);
+      if (data["release-groups"]) {
+        setFetchedReleaseGroups(data["release-groups"]);
+      } else {
+        throw new Error("Response does not contain any release groups");
+      }
     } catch (e) {
-      console.error("Error: ", e);
+      console.error(e);
     } finally {
       setLoading(false);
     }
@@ -38,6 +42,7 @@ function CreateReview() {
 
   const handleSearchSubmit = (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setFetchedReleaseGroups([]);
     fetchReleaseGroups();
   };
 
@@ -68,11 +73,33 @@ function CreateReview() {
   const [rating, setRating] = useState(0);
   const [remarks, setRemarks] = useState("");
   const [loading, setLoading] = useState(false);
+  const [thumbnailLoading, setThumbnailLoading] = useState(false);
   const [isDupe, setIsDupe] = useState(false);
+  const [selectedReleaseGroupImgUrl, setSelectedReleaseGroupImgUrl] = useState("");
 
   useEffect(() => {
     localStorage.setItem("reviews", JSON.stringify(reviews));
   }, [reviews]);
+
+  useEffect(() => {
+    const fetchArt = async () => {
+      if (selectedReleaseGroup) {
+        try {
+          setThumbnailLoading(true);
+          const res = await fetch(
+            `https://coverartarchive.org/release-group/${selectedReleaseGroup.id}`,
+          );
+          const data = await res.json();
+          setSelectedReleaseGroupImgUrl(data.images[0].thumbnails["250"]);
+        } catch (e) {
+          console.error("Error: ", e);
+        } finally {
+          setThumbnailLoading(false);
+        }
+      }
+    };
+    fetchArt();
+  }, [selectedReleaseGroup]);
 
   return (
     <>
@@ -97,6 +124,7 @@ function CreateReview() {
         </Button>
       </form>
       {loading && <div>Please wait. Loading release groups...</div>}
+      {thumbnailLoading && <div>Please wait. Loading thumbnail...</div>}
       <div>
         {fetchedReleaseGroups.map((releaseGroup: ReleaseGroup) => {
           return (
@@ -107,6 +135,7 @@ function CreateReview() {
               <Button
                 variant={"outline"}
                 onClick={() => {
+                  setIsDupe(false);
                   if (reviews.some((review) => review.releaseGroupId === releaseGroup.id)) {
                     setIsDupe(true);
                     alert("You've already reviewed that one!");
@@ -122,9 +151,10 @@ function CreateReview() {
           );
         })}
       </div>
-      {selectedReleaseGroup && !isDupe && (
+      {selectedReleaseGroup && !isDupe && !thumbnailLoading && (
         <div>
           <div>Selected Release Group ID: {selectedReleaseGroup.id}</div>
+          {selectedReleaseGroupImgUrl && <img src={selectedReleaseGroupImgUrl} alt="cover art" />}
           <div>
             Create Review for {selectedReleaseGroup.title} by{" "}
             {selectedReleaseGroup["artist-credit"][0].name}
