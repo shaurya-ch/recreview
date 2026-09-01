@@ -88,7 +88,9 @@ function CreateReview() {
             placeholder="Enter query"
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <FieldDescription>Search for a MusicBrainz release group</FieldDescription>
+          <FieldDescription>
+            Supports Lucene search syntax, for example, try searching "red AND taylor swift"
+          </FieldDescription>
         </Field>
         <Button type="submit" variant={"outline"}>
           Search
