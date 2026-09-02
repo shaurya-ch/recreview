@@ -39,9 +39,21 @@ function SavedReviews() {
     );
   };
 
+  const fetchCover = async (id: string) => {
+    setCoverUrl(null);
+    try {
+      const res = await fetch(`https://coverartarchive.org/release-group/${id}`);
+      const data = await res.json();
+      setCoverUrl(data.images[0].thumbnails["250"]);
+    } catch (e) {
+      console.error("oopsie", e);
+    }
+  };
+
   const [editingId, setEditingId] = useState("");
   const [newRating, setNewRating] = useState(0);
   const [newRemarks, setNewRemarks] = useState("");
+  const [coverUrl, setCoverUrl] = useState<string | null>(null);
 
   useEffect(() => {
     localStorage.setItem("reviews", JSON.stringify(reviews));
@@ -55,30 +67,36 @@ function SavedReviews() {
       {reviews && (
         <div className="flex flex-col gap-2">
           {reviews.map((review) => {
+            fetchCover(review.releaseGroupId);
             return (
               <Card key={review.releaseGroupId}>
                 <CardHeader>
                   <CardTitle>{review.releaseGroupTitle}</CardTitle>
                   <CardDescription>{review.releaseGroupArtist}</CardDescription>
                   <CardAction>
-                    <Button
-                      variant={"outline"}
-                      onClick={() => {
-                        handleDelete(review.releaseGroupId);
-                      }}
-                    >
-                      Delete Review
-                    </Button>
-                    <Button
-                      variant={"outline"}
-                      onClick={() => {
-                        setEditingId(review.releaseGroupId);
-                        setNewRating(review.rating);
-                        setNewRemarks(review.remarks);
-                      }}
-                    >
-                      Edit Review
-                    </Button>
+                    <div className="flex flex-col">
+                      <div className="flex flex-row">
+                        <Button
+                          variant={"outline"}
+                          onClick={() => {
+                            handleDelete(review.releaseGroupId);
+                          }}
+                        >
+                          Delete Review
+                        </Button>
+                        <Button
+                          variant={"outline"}
+                          onClick={() => {
+                            setEditingId(review.releaseGroupId);
+                            setNewRating(review.rating);
+                            setNewRemarks(review.remarks);
+                          }}
+                        >
+                          Edit Review
+                        </Button>
+                      </div>
+                      {coverUrl && <img src={coverUrl} alt="Cover Art" />}
+                    </div>
                   </CardAction>
                 </CardHeader>
                 <CardContent>

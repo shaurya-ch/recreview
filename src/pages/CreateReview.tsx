@@ -94,7 +94,7 @@ function CreateReview() {
   }, [reviews]);
 
   useEffect(() => {
-    const fetchArt = async () => {
+    const fetchCover = async () => {
       if (selectedReleaseGroup) {
         setSelectedReleaseGroupImgUrl("");
         setCoverError(null);
@@ -116,7 +116,7 @@ function CreateReview() {
         }
       }
     };
-    fetchArt();
+    fetchCover();
   }, [selectedReleaseGroup]);
 
   return (
