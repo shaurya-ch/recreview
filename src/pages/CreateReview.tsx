@@ -24,9 +24,13 @@ function CreateReview() {
   const fetchReleaseGroups = async () => {
     try {
       setLoading(true);
+      setReleaseGroupsError(null);
       const res = await fetch(
-        `https://musicbrainz.org/ws/2/release-group/?query=release:${searchQuery}&fmt=json&limit=100`,
+        `https://musicbrainz.org/ws/2/release-group/?query=release:${encodeURIComponent(searchQuery)}&fmt=json&limit=100`,
       );
+      if (!res.ok) {
+        throw new Error(`Musicbrainz returned ${res.status}`);
+      }
       const data = await res.json();
       if (data["release-groups"]) {
         setFetchedReleaseGroups(data["release-groups"]);
@@ -35,6 +39,11 @@ function CreateReview() {
       }
     } catch (e) {
       console.error(e);
+      setReleaseGroupsError(
+        e instanceof Error
+          ? e.message
+          : "Something went wrong when fetching release groups. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -42,6 +51,7 @@ function CreateReview() {
 
   const handleSearchSubmit = (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setReleaseGroupsError(null);
     setFetchedReleaseGroups([]);
     fetchReleaseGroups();
   };
@@ -68,14 +78,16 @@ function CreateReview() {
   };
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [fetchedReleaseGroups, setFetchedReleaseGroups] = useState([]);
+  const [fetchedReleaseGroups, setFetchedReleaseGroups] = useState<ReleaseGroup[]>([]);
   const [selectedReleaseGroup, setSelectedReleaseGroup] = useState<ReleaseGroup>();
   const [rating, setRating] = useState(0);
   const [remarks, setRemarks] = useState("");
   const [loading, setLoading] = useState(false);
-  const [thumbnailLoading, setThumbnailLoading] = useState(false);
+  const [coverLoading, setCoverLoading] = useState(false);
   const [isDupe, setIsDupe] = useState(false);
   const [selectedReleaseGroupImgUrl, setSelectedReleaseGroupImgUrl] = useState("");
+  const [releaseGroupsError, setReleaseGroupsError] = useState<string | null>(null);
+  const [coverError, setCoverError] = useState<string | null>(null);
 
   useEffect(() => {
     localStorage.setItem("reviews", JSON.stringify(reviews));
@@ -84,17 +96,23 @@ function CreateReview() {
   useEffect(() => {
     const fetchArt = async () => {
       if (selectedReleaseGroup) {
+        setSelectedReleaseGroupImgUrl("");
+        setCoverError(null);
         try {
-          setThumbnailLoading(true);
+          setCoverLoading(true);
           const res = await fetch(
             `https://coverartarchive.org/release-group/${selectedReleaseGroup.id}`,
           );
+          if (!res.ok) {
+            throw new Error("Response does not contain cover art");
+          }
           const data = await res.json();
           setSelectedReleaseGroupImgUrl(data.images[0].thumbnails["250"]);
         } catch (e) {
           console.error("Error: ", e);
+          setCoverError(e instanceof Error ? e.message : "Something went wrong fetching cover art");
         } finally {
-          setThumbnailLoading(false);
+          setCoverLoading(false);
         }
       }
     };
@@ -124,7 +142,9 @@ function CreateReview() {
         </Button>
       </form>
       {loading && <div>Please wait. Loading release groups...</div>}
-      {thumbnailLoading && <div>Please wait. Loading thumbnail...</div>}
+      {releaseGroupsError && <div className="text-red-500">{releaseGroupsError}</div>}
+      {coverLoading && <div>Please wait. Loading thumbnail...</div>}
+      {coverError && <div className="text-red-500">{coverError}</div>}
       <div>
         {fetchedReleaseGroups.map((releaseGroup: ReleaseGroup) => {
           return (
@@ -151,10 +171,12 @@ function CreateReview() {
           );
         })}
       </div>
-      {selectedReleaseGroup && !isDupe && !thumbnailLoading && (
+      {selectedReleaseGroup && !isDupe && (
         <div>
           <div>Selected Release Group ID: {selectedReleaseGroup.id}</div>
-          {selectedReleaseGroupImgUrl && <img src={selectedReleaseGroupImgUrl} alt="cover art" />}
+          {selectedReleaseGroupImgUrl && !coverError && (
+            <img src={selectedReleaseGroupImgUrl} alt="cover art" />
+          )}
           <div>
             Create Review for {selectedReleaseGroup.title} by{" "}
             {selectedReleaseGroup["artist-credit"][0].name}
