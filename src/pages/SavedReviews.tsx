@@ -26,9 +26,7 @@ function SavedReviews() {
       reviews.map((review) => {
         if (review.releaseGroupId === id) {
           return {
-            releaseGroupId: review.releaseGroupId,
-            releaseGroupTitle: review.releaseGroupTitle,
-            releaseGroupArtist: review.releaseGroupArtist,
+            ...review,
             rating: newRating,
             remarks: newRemarks,
           };
@@ -39,25 +37,34 @@ function SavedReviews() {
     );
   };
 
-  const fetchCover = async (id: string) => {
-    setCoverUrl(null);
-    try {
-      const res = await fetch(`https://coverartarchive.org/release-group/${id}`);
-      const data = await res.json();
-      setCoverUrl(data.images[0].thumbnails["250"]);
-    } catch (e) {
-      console.error("oopsie", e);
-    }
-  };
-
   const [editingId, setEditingId] = useState("");
   const [newRating, setNewRating] = useState(0);
   const [newRemarks, setNewRemarks] = useState("");
-  const [coverUrl, setCoverUrl] = useState<string | null>(null);
+  const [coverUrls, setCoverUrls] = useState<Record<string, string>>({});
+  const reviewIds = [reviews.map((review) => review.releaseGroupId).join(",")];
 
   useEffect(() => {
     localStorage.setItem("reviews", JSON.stringify(reviews));
   }, [reviews]);
+
+  useEffect(() => {
+    reviews.forEach(async (review) => {
+      if (coverUrls[review.releaseGroupId]) return;
+      try {
+        const res = await fetch(
+          `https://coverartarchive.org/release-group/${review.releaseGroupId}`,
+        );
+        if (!res.ok) {
+          throw new Error("Unable to fetch cover art");
+        }
+        const data = await res.json();
+        const url = data.images?.[0]?.thumbnails?.["250"];
+        setCoverUrls((prev) => ({ ...prev, [review.releaseGroupId]: url }));
+      } catch (e) {
+        console.error("oopsie", e);
+      }
+    });
+  }, [reviewIds]);
 
   return (
     <>
