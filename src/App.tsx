@@ -27,7 +27,14 @@ function App() {
   return (
     <>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-        <Outlet context={[reviews, setReviews] satisfies ReviewContextType} />
+        <main className="h-dvh flex flex-col">
+          <div className="flex-1">
+            <Outlet context={[reviews, setReviews] satisfies ReviewContextType} />
+          </div>
+          <footer className="text-center font-mono text-gray-600 text-xs">
+            Made with ❤ by Shaurya Chaturvedi
+          </footer>
+        </main>
         <Toaster />
       </ThemeProvider>
     </>
