@@ -139,9 +139,12 @@ function CreateReview() {
 
   return (
     <div className="m-2 flex flex-col gap-2">
-      <a href="/" className={`${buttonVariants({ variant: "outline", size: "lg" })} w-20`}>
-        ← Home
-      </a>
+      <div className="relative flex flex-row items-center w-full">
+        <a href="/" className={`${buttonVariants({ variant: "outline", size: "lg" })} w-20`}>
+          ← Home
+        </a>
+        <div className="font-mono absolute left-1/2 -translate-x-1/2 text-md">recreview</div>
+      </div>
       <form onSubmit={(e) => handleSearchSubmit(e)}>
         <Field className="flex flex-col">
           <div className="flex flex-row gap-2 justify-center">
