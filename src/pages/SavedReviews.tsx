@@ -2,7 +2,6 @@ import { buttonVariants } from "@/components/ui/button.tsx";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button.tsx";
 import { Field, FieldGroup, FieldDescription, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input.tsx";
 import { Textarea } from "@/components/ui/textarea.tsx";
 import { useReviewContext } from "@/reviews-context";
 import {
@@ -10,12 +9,16 @@ import {
   CardAction,
   CardDescription,
   CardHeader,
+  CardContent,
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 function SavedReviews() {
+  const starRatings = ["★☆☆☆☆", "★★☆☆☆", "★★★☆☆", "★★★★☆", "★★★★★"];
+
   const [reviews, setReviews] = useReviewContext();
 
   const handleDelete = (id: string) => {
@@ -42,6 +45,7 @@ function SavedReviews() {
   const [newRating, setNewRating] = useState(0);
   const [newRemarks, setNewRemarks] = useState("");
   const [coverUrls, setCoverUrls] = useState<Record<string, string>>({});
+  const [coversLoading, setCoversLoading] = useState(false);
   const reviewIds = reviews.map((review) => review.releaseGroupId).join(",");
 
   useEffect(() => {
@@ -53,6 +57,7 @@ function SavedReviews() {
 
     ids.forEach(async (id: string) => {
       try {
+        setCoversLoading(true);
         const res = await fetch(`https://coverartarchive.org/release-group/${id}`);
         if (!res.ok) {
           throw new Error("Unable to fetch cover art");
@@ -62,26 +67,32 @@ function SavedReviews() {
         setCoverUrls((prev) => (prev[id] ? prev : { ...prev, [id]: url }));
       } catch (e) {
         console.error("oopsie", e);
+      } finally {
+        setCoversLoading(false);
       }
     });
   }, [reviewIds]);
 
   return (
-    <div className="m-2">
-      <a href="/" className={buttonVariants({ variant: "outline", size: "lg" })}>
-        Go Home
+    <div className="m-2 flex flex-col gap-2">
+      <a href="/" className={`${buttonVariants({ variant: "outline", size: "lg" })} w-20`}>
+        ← Home
       </a>
       {reviews && (
         <div className="flex flex-col gap-2">
           {reviews.map((review) => {
             return (
               <div key={review.releaseGroupId} className="flex flex-row items-center gap-2">
-                <img
-                  src={coverUrls[review.releaseGroupId]}
-                  alt="Album cover"
-                  className="w-56 h-56 rounded-xl"
-                />
-                <Card className="w-full">
+                {coversLoading ? (
+                  <div className="min-w-56 min-h-56 rounded-xl bg-[#1c1c1c]"></div>
+                ) : (
+                  <img
+                    src={coverUrls[review.releaseGroupId]}
+                    alt="Album cover"
+                    className="w-56 h-56 rounded-xl"
+                  />
+                )}
+                <Card className="w-full min-h-56 flex flex-col">
                   <CardHeader>
                     <CardAction>
                       <Badge variant="secondary">{review.releaseGroupArtist}</Badge>
@@ -99,16 +110,31 @@ function SavedReviews() {
                           <FieldGroup>
                             <Field>
                               <FieldLabel htmlFor="rating">Rating (1-5)</FieldLabel>
-                              <Input
+                              <ToggleGroup
+                                value={[String(newRating)]}
+                                defaultValue={["1"]}
+                                onValueChange={(groupValue) => {
+                                  if (groupValue.length === 0) return;
+                                  setNewRating(+groupValue);
+                                }}
                                 id="rating"
-                                placeholder="Enter Rating"
-                                type="number"
-                                max={5}
-                                min={1}
-                                step={1}
-                                onChange={(e) => setNewRating(+e.target.value)}
-                                value={newRating}
-                              />
+                              >
+                                <ToggleGroupItem value="1">
+                                  {newRating >= 1 ? <>★</> : <>☆</>}
+                                </ToggleGroupItem>
+                                <ToggleGroupItem value="2">
+                                  {newRating >= 2 ? <>★</> : <>☆</>}
+                                </ToggleGroupItem>
+                                <ToggleGroupItem value="3">
+                                  {newRating >= 3 ? <>★</> : <>☆</>}
+                                </ToggleGroupItem>
+                                <ToggleGroupItem value="4">
+                                  {newRating >= 4 ? <>★</> : <>☆</>}
+                                </ToggleGroupItem>
+                                <ToggleGroupItem value="5">
+                                  {newRating >= 5 ? <>★</> : <>☆</>}
+                                </ToggleGroupItem>
+                              </ToggleGroup>
                             </Field>
                             <Field>
                               <FieldLabel htmlFor="remarks">Remarks</FieldLabel>
@@ -137,13 +163,14 @@ function SavedReviews() {
                         </form>
                       ) : (
                         <div>
-                          <div>{review.rating}</div>
+                          <div>{starRatings[review.rating - 1]}</div>
                           <div>{review.remarks}</div>
                         </div>
                       )}
                     </CardDescription>
                   </CardHeader>
-                  <CardFooter>
+                  <CardContent className="flex-1"></CardContent>
+                  <CardFooter className="flex flex-row gap-2">
                     <Button
                       variant={"outline"}
                       onClick={() => {
