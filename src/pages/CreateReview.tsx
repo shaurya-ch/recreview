@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useReviewContext } from "@/reviews-context";
+import { toast } from "@/components/ui/toast";
+import { useNavigate } from "react-router";
 
 type ReleaseGroup = {
   id: string;
@@ -20,6 +22,7 @@ type ReleaseGroup = {
 
 function CreateReview() {
   const [reviews, setReviews] = useReviewContext();
+  const navigate = useNavigate();
 
   const fetchReleaseGroups = async () => {
     try {
@@ -75,6 +78,11 @@ function CreateReview() {
     setSelectedReleaseGroup(undefined);
     setRating(0);
     setRemarks("");
+    toast.add({
+      type: "success",
+      title: "Review Created",
+    });
+    navigate("/");
   };
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -120,7 +128,7 @@ function CreateReview() {
   }, [selectedReleaseGroup]);
 
   return (
-    <>
+    <div className="m-2">
       <a href="/" className={buttonVariants({ variant: "outline", size: "lg" })}>
         Go Home
       </a>
@@ -213,7 +221,7 @@ function CreateReview() {
           </form>
         </div>
       )}
-    </>
+    </div>
   );
 }
 

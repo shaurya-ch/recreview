@@ -1,6 +1,7 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Outlet } from "react-router";
+import { Toaster } from "@/components/ui/toast";
 
 export type Review = {
   releaseGroupId: string;
@@ -27,6 +28,7 @@ function App() {
     <>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <Outlet context={[reviews, setReviews] satisfies ReviewContextType} />
+        <Toaster />
       </ThemeProvider>
     </>
   );
